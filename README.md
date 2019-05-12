@@ -2,6 +2,13 @@
 
 Raspberry Pi appartement monitor. Monitors several phyisical variables and makes them available through a webpage with graphs. A sense hat is used for its matrix display, the IMU unit and the humidity sensor.  
 
+For the moment, the following sensors work:
+- Air quality : outputs the measured voltage
+- Light
+- Pressure and temperature BMP180
+- Humidity
+- Matrix : basic message printing
+
 ## Air quality
 MICS-5524 https://cdn-shop.adafruit.com/product-files/3199/MiCS-5524.pdf
 ADS1115 http://www.ti.com/lit/ds/symlink/ads1115.pdf I2C address : 0x48
