@@ -17,7 +17,7 @@ fn main() -> Result<(), std::io::Error> {
     let hum = HumiditySensor::new(
         HumAvgCfg::AvgSmplx4, 
         TempAvgCfg::AvgSmplx4, 
-        OutDataRate::DataRate12p5Hz, 
+        OutDataRate::SingleShot, 
         ctrl1_msks::PWR_UP | ctrl1_msks::BDU_ENA, 
         ctrl2_msks::ONE_SHOT_EN, 
         0
@@ -26,13 +26,12 @@ fn main() -> Result<(), std::io::Error> {
     bmp.self_test().unwrap();
 
     println!("H:{:.1}%", hum.get_humidity()?);
-    println!("P:{:.1}HPa", bmp.read_pressure(Oss::Oss1)?);
+    println!("P:{:.2}HPa", bmp.read_pressure(Oss::Oss1)? as f32 / 100.0);
     println!("T:{:.1}*C", bmp.read_temperature()?);
 
-
-    matrix.write(format!("H:{:.1}%", hum.get_humidity()?), colors::LIGHT_BLUE, colors::BLACK, Duration::new(1, 0))?;
-    matrix.write(format!("P:{:.1}HPa", bmp.read_pressure(Oss::Oss1)?), colors::LIGHT_GREEN, colors::BLACK, Duration::new(1, 0))?;
-    matrix.write(format!("T:{:.1}*C", bmp.read_temperature()?), colors::LIGHT_RED, colors::BLACK, Duration::new(1, 0))?;
+    matrix.write(format!("H:{:.1}%", hum.get_humidity()?), colors::LIGHT_BLUE, colors::BLACK, Duration::new(0, 500000000))?;
+    matrix.write(format!("P:{:.1}HPa", bmp.read_pressure(Oss::Oss1)?), colors::GREEN, colors::BLACK, Duration::new(0, 500000000))?;
+    matrix.write(format!("T:{:.1}*C", bmp.read_temperature()?), colors::LIGHT_RED, colors::BLACK, Duration::new(0, 500000000))?;
     
     Ok(())
 }

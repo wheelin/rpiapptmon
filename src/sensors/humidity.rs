@@ -187,6 +187,11 @@ impl HumiditySensor {
         let h0_rh = i2c.smbus_read_byte_data(Regs::H0rHx2 as u8)? as f32 / 2.0;
         let h1_rh = i2c.smbus_read_byte_data(Regs::H1rhx2 as u8)? as f32 / 2.0;
 
+        let status = i2c.smbus_read_byte_data(Regs::Status as u8)?;
+        if status & status_msks::TEMP_DRDY != 0 {
+            let _ = i2c.smbus_read_byte_data(Regs::TempOutHi as u8)?;
+        }
+
         if self.odr == OutDataRate::SingleShot {
             let cfg = self.cfg2 | ctrl2_msks::ONE_SHOT_EN;
             i2c.smbus_write_byte_data(Regs::CtrlReg2 as u8, cfg)?;
@@ -198,7 +203,7 @@ impl HumiditySensor {
         }
 
         let h_out = (((i2c.smbus_read_byte_data(Regs::HumOutHi as u8)? as u16) << 8) +
-                      (i2c.smbus_read_byte_data(Regs::HumOutLo as u8)? as u16)       ) as i16 as f32;
+                      (i2c.smbus_read_byte_data(Regs::HumOutLo as u8)? as u16)     ) as i16 as f32;
 
         let a = (h1_rh - h0_rh) / (h1_out - h0_out);
         let b = ((h1_out * h0_rh) - (h0_out * h1_rh)) / (h1_out - h0_out);
