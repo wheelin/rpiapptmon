@@ -8,6 +8,7 @@ use std::thread;
 use crate::hmi::color::*;
 use crate::hmi::glcdfont::FONT;
 
+#[allow(dead_code)]
 pub enum Orientation {
     Cw0,
     Cw90,

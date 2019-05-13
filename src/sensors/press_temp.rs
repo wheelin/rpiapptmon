@@ -39,10 +39,10 @@ pub struct BMP180 {
     md: i16,
 }
 
-const ADDR: u16 = 0x77;
-const ID: u8 = 0x55;
-const RESET_ORDER: u8 = 0xB6;
-const MEAS_READY_MASK: u8 = 0x20;
+const ADDR            : u16 = 0x77;
+const ID              : u8  = 0x55;
+const RESET_ORDER     : u8  = 0xB6;
+const MEAS_READY_MASK : u8  = 0x20;
 
 fn to_i16(msb: u8, lsb: u8) -> i16 {
     (((msb as u16) << 8) | (lsb as u16)) as i16
@@ -104,6 +104,7 @@ impl BMP180 {
 
     fn read_raw_temperature(&mut self) -> Result<i32, LinuxI2CError> {
         let mut tmpi2c = LinuxI2CDevice::new("/dev/i2c-1", ADDR)?;
+        tmpi2c.smbus_write_byte_data(Reg::CtrlMeas as u8, CtrlMeasureCmd::Temperature as u8)?;
         let mut data_ready = false;
         while data_ready == false {
             data_ready = (tmpi2c.smbus_read_byte_data(Reg::CtrlMeas as u8)? & MEAS_READY_MASK) == 0;
