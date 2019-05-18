@@ -12,6 +12,8 @@ const SCALE_1P024_UNIT : f32 = 1.5625e-05;
 const SCALE_0P512_UNIT : f32 = 7.8125e-06;
 const SCALE_0P256_UNIT : f32 = 3.90625e-06;
 
+const SUPPLY_VOLTAGE   : f32 = 5.0;
+
 
 mod regs {
     pub const CONV  : u8 = 0x00;
@@ -148,6 +150,11 @@ impl AirQuality {
                 _ => voltage * 2.0,
             }
         )
+    }
+
+    pub fn get_ratio_rs_r(&self) -> Result<f32, LinuxI2CError> {
+        let v_out = self.get_voltage()?;
+        Ok(((SUPPLY_VOLTAGE/v_out) - (v_out/SUPPLY_VOLTAGE))/10.0)
     }
 }
 

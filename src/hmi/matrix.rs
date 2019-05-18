@@ -23,10 +23,10 @@ pub struct Matrix {
 }
 
 impl Matrix {
-    pub fn new(f : String, or : Orientation) -> Matrix {
+    pub fn new(f : &str, or : Orientation) -> Matrix {
         Matrix {
             framebuffer : [0; 192 * 2],
-            file_name   : f,
+            file_name   : f.to_owned(),
             orientation : or,
         }
     }

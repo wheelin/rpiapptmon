@@ -105,9 +105,9 @@ impl Light {
         i2c.smbus_write_byte_data(LIGHT_REG_CMD_MSK | LIGHT_CMD_PRTCL_BYTE | (Registers::Enable) as u8, LIGHT_ENA_MSK_PWR_EN).unwrap();
         (
             ((values[0] as u32) << 8) + (values[1] as u32), 
-            ((values[1] as u32) << 8) + (values[3] as u32), 
-            ((values[2] as u32) << 8) + (values[5] as u32), 
-            ((values[3] as u32) << 8) + (values[7] as u32)
+            ((values[2] as u32) << 8) + (values[3] as u32), 
+            ((values[4] as u32) << 8) + (values[5] as u32), 
+            ((values[6] as u32) << 8) + (values[7] as u32)
         )
     }
 
