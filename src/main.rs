@@ -19,7 +19,7 @@ use std::collections::HashMap;
 
 const ACCESS_TOKEN : &str = "Rbq9v5HG1b023o2rPcEZ";
 const ERR_CNTR_MAX : u8   = 10;
-const LOG_FILE     : &str = "log.txt";
+const LOG_FILE     : &str = "/home/pi/log.txt";
 
 fn log_to_file<T : Into<String>>(msg : T) -> Result<(), std::io::Error> {
     let now = Local::now();
@@ -28,7 +28,7 @@ fn log_to_file<T : Into<String>>(msg : T) -> Result<(), std::io::Error> {
                     .create(true)
                     .open(LOG_FILE)?;
 
-    write!(file, "{} [{}]", 
+    writeln!(file, "{} [{}]", 
         now.format("%d/%m/%Y-%H:%M:%S"),
         msg.into(),
     )?;
@@ -96,14 +96,14 @@ fn main() -> Result<(), std::io::Error> {
         }
         log_to_file("Data sent with succes to the cloud.")?;
 
-        log_to_file(format!("temperature : {} *C\n", bmp.read_temperature()?))?;
-        log_to_file(format!("pressure    : {} Pa\n", bmp.read_pressure(Oss::Oss4)?))?;
-        log_to_file(format!("humidity    : {} %\n" , hum.get_humidity()?))?;
-        log_to_file(format!("airquality  : {}\n"   , airq.get_ratio_rs_r()?))?;
-        log_to_file(format!("light_clear : {}\n"   , light_val.0))?;
-        log_to_file(format!("light_red   : {}\n"   , light_val.1))?;
-        log_to_file(format!("light_green : {}\n"   , light_val.2))?;
-        log_to_file(format!("light_blue  : {}\n"   , light_val.3))?;
+        log_to_file(format!("temperature : {} *C", bmp.read_temperature()?))?;
+        log_to_file(format!("pressure    : {} Pa", bmp.read_pressure(Oss::Oss4)?))?;
+        log_to_file(format!("humidity    : {} %" , hum.get_humidity()?))?;
+        log_to_file(format!("airquality  : {}"   , airq.get_ratio_rs_r()?))?;
+        log_to_file(format!("light_clear : {}"   , light_val.0))?;
+        log_to_file(format!("light_red   : {}"   , light_val.1))?;
+        log_to_file(format!("light_green : {}"   , light_val.2))?;
+        log_to_file(format!("light_blue  : {}"   , light_val.3))?;
 
         thread::sleep(Duration::new(30, 0));
     }
