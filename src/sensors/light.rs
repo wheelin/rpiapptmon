@@ -1,5 +1,5 @@
 use i2cdev::core::*;
-use i2cdev::linux::{LinuxI2CDevice, LinuxI2CError};
+use i2cdev::linux::{LinuxI2CDevice};
 use std::thread;
 use std::time::Duration;
 
