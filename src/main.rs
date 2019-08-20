@@ -19,7 +19,11 @@ fn main() -> Result<(), std::io::Error> {
 
     loop {
         let snsr_val = ss.get_sensors_values()?;
-        logger.wr_snsr_vals(&snsr_val);
+        if opts.prnt_stdout == true {
+            println!("{}", snsr_val);
+        } else {
+            logger.wr_snsr_vals(&snsr_val);
+        }
         thread::sleep(Duration::new(opts.period, 0));
     }
     
