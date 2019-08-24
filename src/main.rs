@@ -31,12 +31,11 @@ fn main() -> Result<(), std::io::Error> {
 
     let pir = pir::PirSensor::new(18).unwrap();
     pir.on_detection(when_detected);
+    let pr = light::PhotoResistor::new(&adc_ch2, 10000);
 
     let sndr = Client::new();
 
     loop {
-        //let light_val = light.get_all();
-
         //let request = format!("https://api.thingspeak.com/update?api_key={}&field1={}&field2={}&field3={}&field4={}&field5={}&field6={}&field7={}&field8={}",
         //    ACCESS_TOKEN,
         //    bmp.read_temperature()?,
@@ -50,7 +49,7 @@ fn main() -> Result<(), std::io::Error> {
         //);
         //sndr.get(&request).send().unwrap();
         //thread::sleep(Duration::new(60, 0));
-        println!("light : {}", adc_ch2.get_voltage()?);
+        println!("light : {}", pr.get_ratio()?);
         thread::sleep(Duration::from_secs(1));
     }
     Ok(())
