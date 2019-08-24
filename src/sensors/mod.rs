@@ -1,6 +1,7 @@
-pub mod airq;
-pub mod ads1115;
 pub mod adc;
-pub mod press_temp;
-pub mod light;
+pub mod ads1115;
+pub mod airq;
 pub mod humidity;
+pub mod light;
+pub mod pir;
+pub mod press_temp;

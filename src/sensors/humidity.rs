@@ -84,55 +84,60 @@ pub mod status_msks {
     pub const TEMP_DRDY: u8 = 1 << 0;
 }
 
-pub struct HumiditySensor {
-    havg: HumAvgCfg,
-    tavg: TempAvgCfg,
-    odr: OutDataRate,
-    cfg1: u8,
-    cfg2: u8,
-    cfg3: u8,
+pub struct Hts221Cfg {
+    pub havg: HumAvgCfg,
+    pub tavg: TempAvgCfg,
+    pub odr: OutDataRate,
+    pub cfg1: u8,
+    pub cfg2: u8,
+    pub cfg3: u8,
 }
 
-impl HumiditySensor {
-    pub fn new(
-        havg: HumAvgCfg,
-        tavg: TempAvgCfg,
-        odr: OutDataRate,
-        cfg1: u8,
-        cfg2: u8,
-        cfg3: u8,
-    ) -> Result<HumiditySensor, LinuxI2CError> {
+impl Default for Hts221Cfg {
+    fn default() -> Hts221Cfg {
+        Hts221Cfg {
+            havg : HumAvgCfg::AvgSmplx4,
+            tavg : TempAvgCfg::AvgSmplx4,
+            odr  : OutDataRate::SingleShot,
+            cfg1 : ctrl1_msks::PWR_UP | ctrl1_msks::BDU_ENA,
+            cfg2 : ctrl2_msks::ONE_SHOT_EN,
+            cfg3 : 0,
+        }
+    }
+}
+
+pub struct Hts221 {
+    cfg : Hts221Cfg,
+}
+
+impl Hts221 {
+    pub fn new(cfg : Hts221Cfg) -> Result<Hts221, LinuxI2CError> {
         let mut i2c = LinuxI2CDevice::new("/dev/i2c-1", HUM_I2C_ADDR)?;
         let id = i2c.smbus_read_byte_data(Regs::Id as u8)?;
         if id != HUM_ID_VAL {
             panic!("Cannot read humidity ID");
         }
 
-        let cfg = (cfg1 | (odr as u8)) & 0x87;
-        i2c.smbus_write_byte_data(Regs::CtrlReg1 as u8, cfg)?;
-        let cfg = cfg2 & 0x83;
-        i2c.smbus_write_byte_data(Regs::CtrlReg2 as u8, cfg)?;
-        let cfg = cfg3 & 0xC4;
-        i2c.smbus_write_byte_data(Regs::CtrlReg3 as u8, cfg)?;
+        let tmpcfg = (cfg.cfg1 | (cfg.odr as u8)) & 0x87;
+        i2c.smbus_write_byte_data(Regs::CtrlReg1 as u8, tmpcfg)?;
+        let tmpcfg = cfg.cfg2 & 0x83;
+        i2c.smbus_write_byte_data(Regs::CtrlReg2 as u8, tmpcfg)?;
+        let tmpcfg = cfg.cfg3 & 0xC4;
+        i2c.smbus_write_byte_data(Regs::CtrlReg3 as u8, tmpcfg)?;
 
-        let avg = ((tavg as u8) << 3 | (havg as u8)) & 0x3F;
+        let avg = ((cfg.tavg as u8) << 3 | (cfg.havg as u8)) & 0x3F;
         i2c.smbus_write_byte_data(Regs::AvConf as u8, avg)?;
 
-        Ok(HumiditySensor {
-            havg,
-            tavg,
-            odr,
-            cfg1,
-            cfg2,
-            cfg3,
+        Ok(Hts221 {
+            cfg,
         })
     }
 
     pub fn get_temperature(&self) -> Result<f32, LinuxI2CError> {
         let mut i2c = LinuxI2CDevice::new("/dev/i2c-1", HUM_I2C_ADDR)?;
 
-        let cfg = self.cfg1 | ctrl1_msks::PWR_UP;
-        i2c.smbus_write_byte_data(Regs::CtrlReg1 as u8, cfg)?;
+        let tmpcfg = self.cfg.cfg1 | ctrl1_msks::PWR_UP;
+        i2c.smbus_write_byte_data(Regs::CtrlReg1 as u8, tmpcfg)?;
         let t0_deg_c = i2c.smbus_read_byte_data(Regs::T0DegCx8 as u8)?;
         let t1_deg_c = i2c.smbus_read_byte_data(Regs::T1DegCx8 as u8)?;
         let t10_deg_c_msb = i2c.smbus_read_byte_data(Regs::T1T0Msb as u8)?;
@@ -150,8 +155,8 @@ impl HumiditySensor {
 
         let t1_out = (((t1_outmsb as u16) << 8) + (t1_outlsb as u16)) as f32 / 8.0;
 
-        if self.odr == OutDataRate::SingleShot {
-            let cfg = self.cfg2 | ctrl2_msks::ONE_SHOT_EN;
+        if self.cfg.odr == OutDataRate::SingleShot {
+            let cfg = self.cfg.cfg2 | ctrl2_msks::ONE_SHOT_EN;
             i2c.smbus_write_byte_data(Regs::CtrlReg2 as u8, cfg)?;
         }
 
@@ -176,7 +181,7 @@ impl HumiditySensor {
     pub fn get_humidity(&self) -> Result<f32, LinuxI2CError> {
         let mut i2c = LinuxI2CDevice::new("/dev/i2c-1", HUM_I2C_ADDR)?;
 
-        let cfg = self.cfg1 | ctrl1_msks::PWR_UP;
+        let cfg = self.cfg.cfg1 | ctrl1_msks::PWR_UP;
         i2c.smbus_write_byte_data(Regs::CtrlReg1 as u8, cfg)?;
 
         let h0_out = (((i2c.smbus_read_byte_data(Regs::H0T0OutMsb as u8)? as u16) << 8)
@@ -196,8 +201,8 @@ impl HumiditySensor {
 
         let mut h_out = 0.0;
         for _ in 0..32 {
-            if self.odr == OutDataRate::SingleShot {
-                let cfg = self.cfg2 | ctrl2_msks::ONE_SHOT_EN;
+            if self.cfg.odr == OutDataRate::SingleShot {
+                let cfg = self.cfg.cfg2 | ctrl2_msks::ONE_SHOT_EN;
                 i2c.smbus_write_byte_data(Regs::CtrlReg2 as u8, cfg)?;
             }
             loop {

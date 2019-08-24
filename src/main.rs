@@ -1,3 +1,4 @@
+mod hmi;
 mod sensors;
 
 use reqwest::Client;
@@ -5,21 +6,19 @@ use sensors::ads1115::{Ads1115, Ads1115Channel, Ads1115Conf, Channel};
 use sensors::airq::*;
 use sensors::humidity::*;
 use sensors::light;
+use sensors::pir;
 use sensors::press_temp::*;
 use std::thread;
 use std::time::Duration;
 
 const ACCESS_TOKEN: &str = "NVSTS3TBBO8O4YEH";
 
+fn when_detected() {
+    println!("Detected");
+}
+
 fn main() -> Result<(), std::io::Error> {
-    let hum = HumiditySensor::new(
-        HumAvgCfg::AvgSmplx4,
-        TempAvgCfg::AvgSmplx4,
-        OutDataRate::SingleShot,
-        ctrl1_msks::PWR_UP | ctrl1_msks::BDU_ENA,
-        ctrl2_msks::ONE_SHOT_EN,
-        0,
-    )?;
+    let hum = Hts221::new(Hts221Cfg::default())?;
 
     let mut bmp = BMP180::new()?;
 
@@ -27,12 +26,13 @@ fn main() -> Result<(), std::io::Error> {
 
     let adc = Ads1115::new(Ads1115Conf::default())?;
     let adc_ch1 = Ads1115Channel::new(&adc, Channel::ChRelAn0);
-
+    let adc_ch2 = Ads1115Channel::new(&adc, Channel::ChRelAn1);
     let airq = AirQuality::new(&adc_ch1);
 
-    let sndr = Client::new();
+    let pir = pir::PirSensor::new(18).unwrap();
+    pir.on_detection(when_detected);
 
-    let mut cntr = 0;
+    let sndr = Client::new();
 
     loop {
         //let light_val = light.get_all();
@@ -50,7 +50,7 @@ fn main() -> Result<(), std::io::Error> {
         //);
         //sndr.get(&request).send().unwrap();
         //thread::sleep(Duration::new(60, 0));
-        println!("Humidity : {}", hum.get_humidity()?);
+        println!("light : {}", adc_ch2.get_voltage()?);
         thread::sleep(Duration::from_secs(1));
     }
     Ok(())
