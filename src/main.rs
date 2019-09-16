@@ -49,26 +49,42 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let useless_msg_ids = resp
             .result
             .iter()
-            .filter(|x| x.message.text != "ip" && x.message.text != "env")
+            .filter(|x| (x.message.text != "ip" && x.message.text != "Ip") && 
+                        (x.message.text != "env" && x.message.text != "Env"))
             .map(|x| x.message.message_id)
             .collect::<Vec<u32>>();
         for msg_id in useless_msg_ids.iter() {
             bot.remove_message(*msg_id)?;
         }
-        if resp.result.iter().any(|x| x.message.text == "ip") {
+        if resp.result.iter().any(|x| x.message.text == "ip" || x.message.text == "Ip") {
             bot.send_message(get_external_ip()?, true)?;
         }
-        if resp.result.iter().any(|x| x.message.text == "env") {
+        if resp.result.iter().any(|x| x.message.text == "env" || x.message.text == "Env") {
             let msg = format!("Temperature : {:.2} °C", bmp.read_temperature()?);
-            bot.send_message(msg, true)?;
+            match bot.send_message(msg, true) {
+                Ok(_) => (),
+                Err(_) => thread::sleep(Duration::from_secs(10)),
+            };
             let msg = format!("Pressure    : {:.2} hPa", bmp.read_pressure(Oss::Oss4)?);
-            bot.send_message(msg, false)?;
+            match bot.send_message(msg, false) {
+                Ok(_) => (),
+                Err(_) => thread::sleep(Duration::from_secs(10)),
+            };
             let msg = format!("Humidity    : {:.2} %RH", hum.get_humidity()?);
-            bot.send_message(msg, false)?;
+            match bot.send_message(msg, false) {
+                Ok(_) => (),
+                Err(_) => thread::sleep(Duration::from_secs(10)),
+            }
             let msg = format!("Air quality : {:.2}", airq.get_ratio_rs_r()?);
-            bot.send_message(msg, false)?;
+            match bot.send_message(msg, false) {
+                Ok(_) => (),
+                Err(_) => thread::sleep(Duration::from_secs(10)),
+            }
             let msg = format!("Luminosity  : {:.2}", pr.get_ratio()?);
-            bot.send_message(msg, false)?;
+            match bot.send_message(msg, false) {
+                Ok(_) => (),
+                Err(_) => thread::sleep(Duration::from_secs(10)),
+            }
         }
         thread::sleep(Duration::from_secs(5));
     }
