@@ -5,7 +5,13 @@ authors = ["greg"]
 edition = "2018"
 
 [dependencies]
-i2cdev = "0.4.1"
+ads1115 = {git="https://github.com/wheelin/rs-ads1115"}
+bmp180 = {git="https://github.com/wheelin/rs-bmp180"}
+hts221 = {git="https://github.com/wheelin/rs-hts221"}
+lightsensor = {git="https://github.com/wheelin/rs-photoresistor"}
+airqualitysensor = {git="https://github.com/wheelin/rs-airq"}
+
+i2cdev = "0.4.2"
 chrono = "0.4.6"
 reqwest = "0.9.20"
 serde_json = "1.0.40"

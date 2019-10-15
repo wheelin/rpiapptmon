@@ -1,13 +1,12 @@
 mod hmi;
-mod sensors;
 mod telegram;
 
-use sensors::ads1115::{Ads1115, Ads1115Channel, Ads1115Conf, Channel};
-use sensors::airq::*;
-use sensors::humidity::*;
-use sensors::light;
-use sensors::pir;
-use sensors::press_temp::*;
+use ads1115::*;
+use airqualitysensor::*;
+use hts221::*;
+use lightsensor::*;
+use bmp180::{Bmp180};
+
 use std::thread;
 use std::time::Duration;
 
@@ -33,7 +32,7 @@ fn get_external_ip() -> Result<String, reqwest::Error> {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let hum = Hts221::new(Hts221Cfg::default())?;
 
-    let mut bmp = BMP180::new()?;
+    let mut bmp = Bmp180::new()?;
 
     bmp.self_test().unwrap();
 
@@ -41,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let adc_ch1 = Ads1115Channel::new(&adc, Channel::ChRelAn0);
     let adc_ch2 = Ads1115Channel::new(&adc, Channel::ChRelAn1);
     let airq = AirQuality::new(&adc_ch1);
-    let pr = light::PhotoResistor::new(&adc_ch2, 10000);
+    let pr = PhotoResistor::new(&adc_ch2);
     let mut bot = TelegramBot::new(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, Some(TELEGRAM_USER_ID));
 
     loop {
@@ -65,7 +64,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 Ok(_) => (),
                 Err(_) => thread::sleep(Duration::from_secs(10)),
             };
-            let msg = format!("Pressure    : {:.2} hPa", bmp.read_pressure(Oss::Oss4)?);
+            let msg = format!("Pressure    : {:.2} hPa", bmp.read_pressure(bmp180::Oss::Oss4)?);
             match bot.send_message(msg, false) {
                 Ok(_) => (),
                 Err(_) => thread::sleep(Duration::from_secs(10)),
