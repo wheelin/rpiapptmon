@@ -60,32 +60,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         if resp.result.iter().any(|x| x.message.text == "env" || x.message.text == "Env") {
             let msg = format!("Temperature : {:.2} °C", bmp.read_temperature()?);
-            match bot.send_message(msg, true) {
-                Ok(_) => (),
-                Err(_) => thread::sleep(Duration::from_secs(10)),
-            };
+            send(&mut bot, msg);
             let msg = format!("Pressure    : {:.2} hPa", bmp.read_pressure(bmp180::Oss::Oss4)?);
-            match bot.send_message(msg, false) {
-                Ok(_) => (),
-                Err(_) => thread::sleep(Duration::from_secs(10)),
-            };
+            send(&mut bot, msg);
             let msg = format!("Humidity    : {:.2} %RH", hum.get_humidity()?);
-            match bot.send_message(msg, false) {
-                Ok(_) => (),
-                Err(_) => thread::sleep(Duration::from_secs(10)),
-            }
+            send(&mut bot, msg);
             let msg = format!("Air quality : {:.2}", airq.get_ratio_rs_r()?);
-            match bot.send_message(msg, false) {
-                Ok(_) => (),
-                Err(_) => thread::sleep(Duration::from_secs(10)),
-            }
+            send(&mut bot, msg);
             let msg = format!("Luminosity  : {:.2}", pr.get_ratio()?);
-            match bot.send_message(msg, false) {
-                Ok(_) => (),
-                Err(_) => thread::sleep(Duration::from_secs(10)),
-            }
+            send(&mut bot, msg);
         }
         thread::sleep(Duration::from_secs(5));
     }
     Ok(())
+}
+
+fn send(bot : &mut TelegramBot, msg : String) {
+  match bot.send_message(msg, false) {
+    Ok(_) => (),
+    Err(_) => thread::sleep(Duration::from_secs(10)),
+  };
 }
