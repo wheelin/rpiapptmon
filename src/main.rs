@@ -35,7 +35,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 	airq.get_ratio_rs_r().unwrap_or(0.0);
 	pr.get_ratio().unwrap_or(0.0);
 
-    let listener = TcpListener::bind("127.0.0.1:9999").unwrap();
+    let listener = TcpListener::bind("0.0.0.0:9999").unwrap();
 
     for stream in listener.incoming() {
         let mut data : Vec<u8> = Vec::new();
