@@ -8,9 +8,6 @@ edition = "2018"
 i2cdev = "0.4.2"
 chrono = "0.4.9"
 reqwest = "0.9.22"
-jsonrpc = "0.11.0"
-jsonrpc-core = "14.0.1"
-jsonrpc-tcp-server = "14.0"
 
 ads1115 = {git = "https://github.com/wheelin/rs-ads1115"}
 lightsensor = {git = "https://github.com/wheelin/rs-photoresistor"}
