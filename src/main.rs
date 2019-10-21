@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for stream in listener.incoming() {
         let mut data : Vec<u8> = Vec::new();
         let mut stream = stream?;
-        if stream.read_to_end(&mut data)? == 1 {
+        if stream.read(&mut data)? == 1 {
             println!("Data : {:?}", data);
             match data[0] {
                 TCP_PRESSURE_REQ    => writeln!(stream, "{}", bmp.read_pressure(Oss::Oss8)?)?,
